@@ -11,12 +11,12 @@ internal record MinMaxNode
 
     public float Avaliation => avaliation;
     public IState State { get; init; }
-    public bool Max { get; init; }
+    public bool IsMax { get; init; }
 
     public MinMaxNode(IState state, bool max)
     {
         this.State = state;
-        this.Max = max;
+        this.IsMax = max;
         this.children = new List<MinMaxNode>();
         this.parent = null;
         this.expanded = false;
@@ -30,7 +30,7 @@ internal record MinMaxNode
     }
 
     public MinMaxNode ChooseBest()
-        => Max ? getMaxNode() : getMinNode();
+        => IsMax ? getMaxNode() : getMinNode();
 
     private MinMaxNode getMaxNode()
     {
@@ -68,7 +68,7 @@ internal record MinMaxNode
 
     private void addChild(IState state)
         => this.children.Add(
-            new MinMaxNode(state, !this.Max)
+            new MinMaxNode(state, !this.IsMax)
             {
                 parent = this
             }
@@ -108,13 +108,14 @@ internal record MinMaxNode
         if (children.Count == 0 || !this.expanded)
             return this.avaliation;
         
-        return Max ? computeMaxNewValue(alfa, beta) :
+        return IsMax ? computeMaxNewValue(alfa, beta) :
             computeMinNewValue(alfa, beta);
     }
 
     private float computeMaxNewValue(float alfa, float beta)
     {
         float newValue = float.NegativeInfinity;
+
         foreach (var child in children)
         {
             bool changed = child.compute(alfa, beta);
@@ -130,6 +131,7 @@ internal record MinMaxNode
             alfa = alfa > newValue 
                 ? alfa : newValue;
         }
+
         return newValue;
     }
 
