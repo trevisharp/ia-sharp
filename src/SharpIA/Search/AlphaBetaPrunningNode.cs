@@ -2,22 +2,22 @@ using System.Collections.Generic;
 
 namespace SharpIA.Search;
 
-internal record MinMaxNode
+internal record AlphaBetaPrunningNode
 {
     private bool expanded;
-    private MinMaxNode parent;
+    private AlphaBetaPrunningNode parent;
     private float avaliation;
-    private List<MinMaxNode> children;
+    private List<AlphaBetaPrunningNode> children;
 
     public float Avaliation => avaliation;
     public IState State { get; init; }
     public bool IsMax { get; init; }
 
-    public MinMaxNode(IState state, bool max)
+    public AlphaBetaPrunningNode(IState state, bool max)
     {
         this.State = state;
         this.IsMax = max;
-        this.children = new List<MinMaxNode>();
+        this.children = new List<AlphaBetaPrunningNode>();
         this.parent = null;
         this.expanded = false;
         this.avaliation = State.Avaliation;
@@ -29,12 +29,12 @@ internal record MinMaxNode
         compute();
     }
 
-    public MinMaxNode ChooseBest()
+    public AlphaBetaPrunningNode ChooseBest()
         => IsMax ? getMaxNode() : getMinNode();
 
-    private MinMaxNode getMaxNode()
+    private AlphaBetaPrunningNode getMaxNode()
     {
-        MinMaxNode best = null;
+        AlphaBetaPrunningNode best = null;
         float bestAvaliation = float.NegativeInfinity;
 
         foreach (var child in children)
@@ -49,9 +49,9 @@ internal record MinMaxNode
         return best;
     }
 
-    private MinMaxNode getMinNode()
+    private AlphaBetaPrunningNode getMinNode()
     {
-        MinMaxNode best = null;
+        AlphaBetaPrunningNode best = null;
         float bestAvaliation = float.PositiveInfinity;
 
         foreach (var child in children)
@@ -68,7 +68,7 @@ internal record MinMaxNode
 
     private void addChild(IState state)
         => this.children.Add(
-            new MinMaxNode(state, !this.IsMax)
+            new AlphaBetaPrunningNode(state, !this.IsMax)
             {
                 parent = this
             }

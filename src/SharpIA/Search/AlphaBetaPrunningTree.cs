@@ -1,14 +1,14 @@
 namespace SharpIA.Search;
 
-public class MinMaxTree
+public class AlphaBetaPrunningTree
 {
-    private MinMaxNode root;
+    private AlphaBetaPrunningNode root;
 
     public IState Current => root.State;
 
-    public MinMaxTree(IState initial, bool max = true)
+    public AlphaBetaPrunningTree(IState initial, bool max = true)
     {
-        this.root = new MinMaxNode(initial, max);
+        this.root = new AlphaBetaPrunningNode(initial, max);
     }
 
     public void Expand(int depth)
