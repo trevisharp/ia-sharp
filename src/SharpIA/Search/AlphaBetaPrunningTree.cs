@@ -1,20 +1,20 @@
 namespace SharpIA.Search;
 
-public class AlphaBetaPrunningTree
+public class AlphaBetaPrunningTree : SearchTree
 {
     private AlphaBetaPrunningNode root;
 
-    public IState Current => root.State;
+    public override IState Root => root.State;
 
     public AlphaBetaPrunningTree(IState initial, bool max = true)
     {
         this.root = new AlphaBetaPrunningNode(initial, max);
     }
 
-    public void Expand(int depth)
+    public override void Expand(int depth)
         => this.root.Expand(depth);
 
-    public void PlayBest()
+    public override void PlayBest()
     {
         var newState = this.root.ChooseBest();
         if (newState == null)
