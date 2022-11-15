@@ -6,11 +6,10 @@ internal record MinMaxNode
 {
     private bool expanded;
     private MinMaxNode parent;
+    private float avaliation;
     private List<MinMaxNode> children;
-    private float alfa;
-    private float beta;
-    private float deepAvaliation;
 
+    public float Avaliation => avaliation;
     public IState State { get; init; }
     public bool Max { get; init; }
 
@@ -21,74 +20,139 @@ internal record MinMaxNode
         this.children = new List<MinMaxNode>();
         this.parent = null;
         this.expanded = false;
-        this.alfa = max ? float.NegativeInfinity : float.PositiveInfinity;
-        this.beta = max ? float.PositiveInfinity : float.NegativeInfinity;
+        this.avaliation = State.Avaliation;
     }
 
     public void Expand(int depth = 1)
     {
-        if (depth == 0)
-            return;
-        
-        if (this.expanded)
-        {
-            update(depth);
-            return;
-        }
-        
-        foreach (var next in State.NextMoves())
-        {
-            MinMaxNode newNode = new MinMaxNode(next, !Max);
-            newNode.Expand(depth - 1);
-            this.children.Add(newNode);
-        }
-        this.deepAvaliation = expand(depth);
+        expand(depth);
+        compute();
     }
 
-    private float update(int depth)
+    public MinMaxNode ChooseBest()
+        => Max ? getMaxNode() : getMinNode();
+
+    private MinMaxNode getMaxNode()
     {
-        throw new System.NotImplementedException();
+        MinMaxNode best = null;
+        float bestAvaliation = float.NegativeInfinity;
+
+        foreach (var child in children)
+        {
+            if (child.avaliation > bestAvaliation)
+            {
+                bestAvaliation = child.avaliation;
+                best = child;
+            }
+        }
+
+        return best;
     }
 
-    private float expand(int depth)
+    private MinMaxNode getMinNode()
     {
+        MinMaxNode best = null;
+        float bestAvaliation = float.PositiveInfinity;
+
+        foreach (var child in children)
+        {
+            if (child.avaliation < bestAvaliation)
+            {
+                bestAvaliation = child.avaliation;
+                best = child;
+            }
+        }
+
+        return best;
+    }
+
+    private void addChild(IState state)
+        => this.children.Add(
+            new MinMaxNode(state, !this.Max)
+            {
+                parent = this
+            }
+        );
+
+    private void expand(int depth)
+    {
+        if (depth < 1)
+            return;
+        
+        if (!this.expanded)
+        {
+            foreach (var next in State.NextMoves())
+                addChild(next);
+        }
+        
+        foreach (var child in children)
+            child.Expand(depth - 1);
+        
         this.expanded = true;
+    }
 
-        var avaliation = this.State.Avaliation;
-        if (depth == 0 || float.IsFinite(avaliation))
-            return avaliation;
+    private bool compute(
+        float alfa = float.NegativeInfinity, 
+        float beta = float.PositiveInfinity)
+    {
+        var newValue = computeNewValue(alfa, beta);
 
-        float value = float.NaN;
-        if (this.Max)
+        bool hasChanged = this.avaliation != newValue;
+        this.avaliation = newValue;
+
+        return hasChanged;
+    }
+
+    private float computeNewValue(float alfa, float beta)
+    {
+        if (children.Count == 0 || !this.expanded)
+            return this.avaliation;
+        
+        return Max ? computeMaxNewValue(alfa, beta) :
+            computeMinNewValue(alfa, beta);
+    }
+
+    private float computeMaxNewValue(float alfa, float beta)
+    {
+        float newValue = float.NegativeInfinity;
+        foreach (var child in children)
         {
-            value = float.NegativeInfinity;
-            foreach (var node in this.children)
-            {
-                if (node.deepAvaliation > value)
-                    value = node.deepAvaliation;
-                
-                if (value >= beta)
-                    return value;
-                
-                if (value > alfa)
-                    alfa = value;
-            }
+            bool changed = child.compute(alfa, beta);
+            if (!changed)
+                continue;
+            
+            float value = child.avaliation;
+            newValue = value > newValue
+                ? value : newValue;
+            if (value > beta)
+                break;
+            
+            alfa = alfa > newValue 
+                ? alfa : newValue;
         }
-        else
+        return newValue;
+    }
+
+    private float computeMinNewValue(float alfa, float beta)
+    {
+        float newValue = float.PositiveInfinity;
+
+        foreach (var child in children)
         {
-            value = float.PositiveInfinity;
-            foreach (var node in this.children)
-            {
-                if (node.deepAvaliation < value)
-                    value = node.deepAvaliation;
-                
-                if (value <= alfa)
-                    return value;
-                
-                if (value < beta)
-                    beta = value;
-            }
+            bool changed = child.compute(alfa, beta);
+            if (!changed)
+                continue;
+            
+            float value = child.avaliation;
+            newValue = value < newValue
+                ? value : newValue;
+            if (value < alfa)
+                break;
+            
+            beta = beta < newValue 
+                ? beta : newValue;
         }
-        return value;
+
+        return newValue;
     }
 }

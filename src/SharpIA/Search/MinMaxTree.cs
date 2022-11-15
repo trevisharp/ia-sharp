@@ -12,12 +12,14 @@ public class MinMaxTree
     }
 
     public void Expand(int depth)
-    {
-        this.root.Expand(depth);
-    }
+        => this.root.Expand(depth);
 
     public void PlayBest()
     {
-        throw new System.NotImplementedException();
+        var newState = this.root.ChooseBest();
+        if (newState == null)
+            return;
+        
+        this.root = newState;
     }
 }
