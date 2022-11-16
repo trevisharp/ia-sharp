@@ -4,6 +4,8 @@ using System.Text;
 
 SuperTicTacToeState initial = new SuperTicTacToeState();
 var ia = initial.AlphaBetaPrunningSearch(true);
+ia.Expand(1);
+
 foreach (var x in ia.GetFullPath())
     Console.WriteLine(x);
 

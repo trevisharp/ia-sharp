@@ -21,7 +21,7 @@ public static class Searches
         }
     }
 
-    public static SearchAlgorithm DepthFirstSearch(this IState state, bool findMax = true)
+    public static DepthFirstTree DepthFirstSearch(this IState state, bool findMax = true)
     {
         if (state is ITreeState treeState)
             return new DepthFirstTree(treeState, findMax);
@@ -31,7 +31,7 @@ public static class Searches
         );
     }
 
-    public static SearchAlgorithm BreadthFirstSearch(this IState state, bool findMax = true)
+    public static BreadthFirstTree BreadthFirstSearch(this IState state, bool findMax = true)
     {
         if (state is ITreeState treeState)
             return new BreadthFirstTree(treeState, findMax);
@@ -41,7 +41,7 @@ public static class Searches
         );
     }
 
-    public static SearchAlgorithm MinMaxSearch(this IState state, bool findMax = true)
+    public static MinMaxTree MinMaxSearch(this IState state, bool findMax = true)
     {
         if (state is ITreeState treeState)
             return new MinMaxTree(treeState, findMax);
@@ -51,7 +51,7 @@ public static class Searches
         );
     }
 
-    public static SearchAlgorithm AlphaBetaPrunningSearch(this IState state, bool findMax = true)
+    public static AlphaBetaPrunningTree AlphaBetaPrunningSearch(this IState state, bool findMax = true)
     {
         if (state is ITreeState treeState)
             return new AlphaBetaPrunningTree(treeState, findMax);
