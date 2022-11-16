@@ -12,12 +12,13 @@ public class MinMaxTree : SearchTree
     public void Expand(int depth)
         => this.root.Expand(depth);
 
-    public override void ChooseNext()
+    public override IState ChooseNext()
     {
         var newState = this.root.ChooseBest();
         if (newState == null)
-            return;
+            return this.root.State;
         
         this.root = newState;
+        return this.root.State;
     }
 }

@@ -25,12 +25,13 @@ public class DepthFirstTree : SearchTree
         }
     }
 
-    public override void ChooseNext()
+    public override IState ChooseNext()
     {
         if (nexts.Count < 2)
-            return;
+            return this.Root;
         
         nexts.Pop();
+        return this.Root;
     }
     
     private ITreeState search()
