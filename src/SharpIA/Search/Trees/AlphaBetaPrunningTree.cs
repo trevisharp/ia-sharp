@@ -5,6 +5,7 @@ public class AlphaBetaPrunningTree : SearchTree
     private AlphaBetaPrunningNode root;
 
     public override ITreeState Root => root.State;
+    public float Avaliation => root.Avaliation;
 
     public AlphaBetaPrunningTree(ITreeState initial, bool max = true)
         => this.root = new AlphaBetaPrunningNode(initial, max);

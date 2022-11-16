@@ -3,19 +3,26 @@ using SharpIA.Search.Trees;
 using System.Text;
 
 SuperTicTacToeState initial = new SuperTicTacToeState();
+initial = initial.Move(5, 5);
+initial = initial.Move(6, 6);
 
 var ia = initial.AlphaBetaPrunningSearch();
-int N = 5;
-ia.Expand(N);
+int N = 6;
+
+Console.ReadKey(true);
+Console.Clear();
+Console.WriteLine(ia.Avaliation);
+Console.WriteLine(ia.Root);
 
 for (int i = 0; i < 81; i++)
 {
+    ia.Expand(N);
+    ia.ChooseNext();
+
     Console.ReadKey(true);
     Console.Clear();
+    Console.WriteLine(ia.Avaliation);
     Console.WriteLine(ia.Root);
-
-    ia.ChooseNext();
-    ia.Expand(N);
 }
 
 public class SuperTicTacToeState : ITreeState
@@ -153,6 +160,8 @@ public class SuperTicTacToeState : ITreeState
         {
             for (int i = 0; i < 3; i++)
             {
+                if (fullWinInfo[i + 3 * j] == 0)
+                    continue;
                 float subValue = -2 * (fullWinInfo[i + 3 * j] - 1) + 1;
                 if (j == 1)
                     subValue *= 1.414f;
@@ -160,6 +169,19 @@ public class SuperTicTacToeState : ITreeState
                     subValue *= 1.414f;
                 value += subValue;
             }
+        }
+        for (int k = 0; k < 9; k++)
+        {
+            if (fullWinInfo[k] != 0)
+                continue;
+            
+            float subValue = 0f;
+            for (int i = 0; i < 8; i++)
+                subValue += winInfo[8 * k + i];
+            
+            subValue = -subValue / 32f;
+
+            value += subValue;
         }
         return value;
     }
@@ -216,7 +238,6 @@ public class SuperTicTacToeState : ITreeState
     public override string ToString()
     {
         StringBuilder builder = new StringBuilder();
-        builder.AppendLine(avaliation.ToString());
         for (int j = 0; j < 3; j++)
         {
             for (int i = 0; i < 3; i++)

@@ -20,7 +20,7 @@ internal record AlphaBetaPrunningNode
         this.children = new List<AlphaBetaPrunningNode>();
         this.parent = null;
         this.expanded = false;
-        this.avaliation = State.Avaliation;
+        this.avaliation = float.NaN;
     }
 
     public void Expand(int depth = 1)
@@ -91,22 +91,15 @@ internal record AlphaBetaPrunningNode
         this.expanded = true;
     }
 
-    private bool compute(
+    private void compute(
         float alfa = float.NegativeInfinity, 
         float beta = float.PositiveInfinity)
-    {
-        var newValue = computeNewValue(alfa, beta);
-
-        bool hasChanged = this.avaliation != newValue;
-        this.avaliation = newValue;
-
-        return hasChanged;
-    }
+            => this.avaliation = computeNewValue(alfa, beta);
 
     private float computeNewValue(float alfa, float beta)
     {
         if (children.Count == 0 || !this.expanded)
-            return this.avaliation;
+            return State.Avaliation;
         
         return IsMax ? computeMaxNewValue(alfa, beta) :
             computeMinNewValue(alfa, beta);
@@ -118,9 +111,7 @@ internal record AlphaBetaPrunningNode
 
         foreach (var child in children)
         {
-            bool changed = child.compute(alfa, beta);
-            if (!changed)
-                continue;
+            child.compute(alfa, beta);
             
             float value = child.avaliation;
             newValue = value > newValue
@@ -141,9 +132,7 @@ internal record AlphaBetaPrunningNode
 
         foreach (var child in children)
         {
-            bool changed = child.compute(alfa, beta);
-            if (!changed)
-                continue;
+            child.compute(alfa, beta);
             
             float value = child.avaliation;
             newValue = value < newValue
