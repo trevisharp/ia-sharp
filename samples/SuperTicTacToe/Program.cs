@@ -3,11 +3,20 @@ using SharpIA.Search.Trees;
 using System.Text;
 
 SuperTicTacToeState initial = new SuperTicTacToeState();
-var ia = initial.AlphaBetaPrunningSearch(true);
-ia.Expand(1);
 
-foreach (var x in ia.GetFullPath())
-    Console.WriteLine(x);
+var ia = initial.AlphaBetaPrunningSearch();
+int N = 5;
+ia.Expand(N);
+
+for (int i = 0; i < 81; i++)
+{
+    Console.ReadKey(true);
+    Console.Clear();
+    Console.WriteLine(ia.Root);
+
+    ia.ChooseNext();
+    ia.Expand(N);
+}
 
 public class SuperTicTacToeState : ITreeState
 {
@@ -27,7 +36,7 @@ public class SuperTicTacToeState : ITreeState
     public IEnumerable<ITreeState> NextMoves()
     {
         int si = 0, sj = 0, ei = 9, ej = 9;
-        if (_i != -1 && _j != -1)
+        if (_i != -1 || _j != -1)
         {
             si = 3 * _i;
             ei = si + 3;
@@ -38,9 +47,13 @@ public class SuperTicTacToeState : ITreeState
         {
             for (int i = si; i < ei; i++)
             {
+                if (fullWinInfo[3 * (j / 3) + (i / 3)] != 0)
+                    continue;
+                
                 var move = Move(i, j);
                 if (move == null)
                     continue;
+                
                 yield return move;
             }
         }
@@ -86,7 +99,7 @@ public class SuperTicTacToeState : ITreeState
         newState.winInfo[baseIndex + 3 + pj] += contribuition;
         if (pi == pj)
             newState.winInfo[baseIndex + 6] += contribuition;
-        else if (pi + pj == 2)
+        if (pi + pj == 2)
             newState.winInfo[baseIndex + 7] += contribuition;
         
         for (int k = baseIndex; k < baseIndex + 8; k++)
@@ -103,15 +116,15 @@ public class SuperTicTacToeState : ITreeState
             }
         }
 
-        if (newState.fullWinInfo[_i + 3 * _j] != 0)
+        if (newState.fullWinInfo[pi + 3 * pj] != 0)
         {
             newState._i = -1;
             newState._j = -1;
         }
         else
         {
-            newState._i = i;
-            newState._j = j;
+            newState._i = pi;
+            newState._j = pj;
         }
 
         newState.avaliate();
@@ -203,6 +216,32 @@ public class SuperTicTacToeState : ITreeState
     public override string ToString()
     {
         StringBuilder builder = new StringBuilder();
+        builder.AppendLine(avaliation.ToString());
+        for (int j = 0; j < 3; j++)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                int index = 3 * j + i;
+                switch (fullWinInfo[index])
+                {
+                    case 0:
+                        builder.Append(" ");
+                        break;
+                    case 1:
+                        builder.Append("X");
+                        break;
+                    case 2:
+                        builder.Append("O");
+                        break;
+                }
+                if (i < 2)
+                    builder.Append("|");
+            }
+            builder.AppendLine();
+            if (j < 2)
+                builder.AppendLine("─┼─┼─");
+        }
+        builder.AppendLine();
 
         builder.AppendLine("╔═╤═╤═╦═╤═╤═╦═╤═╤═╗");
         for (int j = 0; j < 9; j++)
