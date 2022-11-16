@@ -1,18 +1,18 @@
-namespace SharpIA.Search;
+namespace SharpIA.Search.Trees;
 
 public class MinMaxTree : SearchTree
 {
     private MinMaxNode root;
 
-    public override IState Root => root.State;
+    public override ITreeState Root => root.State;
 
-    public MinMaxTree(IState initial, bool max = true)
+    public MinMaxTree(ITreeState initial, bool max = true)
         => this.root = new MinMaxNode(initial, max);
 
-    public override void Expand(int depth)
+    public void Expand(int depth)
         => this.root.Expand(depth);
 
-    public override void PlayBest()
+    public override void ChooseNext()
     {
         var newState = this.root.ChooseBest();
         if (newState == null)

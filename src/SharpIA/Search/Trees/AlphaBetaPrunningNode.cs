@@ -1,23 +1,23 @@
 using System.Collections.Generic;
 
-namespace SharpIA.Search;
+namespace SharpIA.Search.Trees;
 
-public record MinMaxNode
+internal record AlphaBetaPrunningNode
 {
     private bool expanded;
-    private MinMaxNode parent;
+    private AlphaBetaPrunningNode parent;
     private float avaliation;
-    private List<MinMaxNode> children;
+    private List<AlphaBetaPrunningNode> children;
 
     public float Avaliation => avaliation;
-    public IState State { get; init; }
+    public ITreeState State { get; init; }
     public bool IsMax { get; init; }
 
-    public MinMaxNode(IState state, bool max)
+    public AlphaBetaPrunningNode(ITreeState state, bool max)
     {
         this.State = state;
         this.IsMax = max;
-        this.children = new List<MinMaxNode>();
+        this.children = new List<AlphaBetaPrunningNode>();
         this.parent = null;
         this.expanded = false;
         this.avaliation = State.Avaliation;
@@ -29,12 +29,12 @@ public record MinMaxNode
         compute();
     }
 
-    public MinMaxNode ChooseBest()
+    public AlphaBetaPrunningNode ChooseBest()
         => IsMax ? getMaxNode() : getMinNode();
 
-    private MinMaxNode getMaxNode()
+    private AlphaBetaPrunningNode getMaxNode()
     {
-        MinMaxNode best = null;
+        AlphaBetaPrunningNode best = null;
         float bestAvaliation = float.NegativeInfinity;
 
         foreach (var child in children)
@@ -49,9 +49,9 @@ public record MinMaxNode
         return best;
     }
 
-    private MinMaxNode getMinNode()
+    private AlphaBetaPrunningNode getMinNode()
     {
-        MinMaxNode best = null;
+        AlphaBetaPrunningNode best = null;
         float bestAvaliation = float.PositiveInfinity;
 
         foreach (var child in children)
@@ -66,9 +66,9 @@ public record MinMaxNode
         return best;
     }
 
-    private void addChild(IState state)
+    private void addChild(ITreeState state)
         => this.children.Add(
-            new MinMaxNode(state, !this.IsMax)
+            new AlphaBetaPrunningNode(state, !this.IsMax)
             {
                 parent = this
             }
@@ -91,9 +91,11 @@ public record MinMaxNode
         this.expanded = true;
     }
 
-    private bool compute()
+    private bool compute(
+        float alfa = float.NegativeInfinity, 
+        float beta = float.PositiveInfinity)
     {
-        var newValue = computeNewValue();
+        var newValue = computeNewValue(alfa, beta);
 
         bool hasChanged = this.avaliation != newValue;
         this.avaliation = newValue;
@@ -101,46 +103,56 @@ public record MinMaxNode
         return hasChanged;
     }
 
-    private float computeNewValue()
+    private float computeNewValue(float alfa, float beta)
     {
         if (children.Count == 0 || !this.expanded)
             return this.avaliation;
         
-        return IsMax ? computeMaxNewValue() :
-            computeMinNewValue();
+        return IsMax ? computeMaxNewValue(alfa, beta) :
+            computeMinNewValue(alfa, beta);
     }
 
-    private float computeMaxNewValue()
+    private float computeMaxNewValue(float alfa, float beta)
     {
         float newValue = float.NegativeInfinity;
 
         foreach (var child in children)
         {
-            bool changed = child.compute();
+            bool changed = child.compute(alfa, beta);
             if (!changed)
                 continue;
             
             float value = child.avaliation;
             newValue = value > newValue
                 ? value : newValue;
+            if (value > beta)
+                break;
+            
+            alfa = alfa > newValue 
+                ? alfa : newValue;
         }
 
         return newValue;
     }
 
-    private float computeMinNewValue()
+    private float computeMinNewValue(float alfa, float beta)
     {
         float newValue = float.PositiveInfinity;
 
         foreach (var child in children)
         {
-            bool changed = child.compute();
+            bool changed = child.compute(alfa, beta);
             if (!changed)
                 continue;
             
             float value = child.avaliation;
             newValue = value < newValue
                 ? value : newValue;
+            if (value < alfa)
+                break;
+            
+            beta = beta < newValue 
+                ? beta : newValue;
         }
 
         return newValue;
