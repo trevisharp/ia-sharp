@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace SharpIA.Search;
+namespace SharpIA.Search.Trees;
 
 public record MinMaxNode
 {
